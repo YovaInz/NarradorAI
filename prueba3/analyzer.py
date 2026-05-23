@@ -3,6 +3,7 @@ import base64
 import requests
 import json
 import os
+from dotenv import load_dotenv
 from google import genai
 from google.genai import types
 from PyQt6.QtCore import QThread, pyqtSignal
@@ -27,7 +28,10 @@ class VideoAnalyzerSignals(QThread):
         self.api_type = api_type
         self.ollama_url = ollama_url
 
-        self.api_key = os.environ.get("GEMINI_API_KEY", "AIzaSyAW1BT-rSAII6FqCGo7b5ArnENZBdpsMdQ")
+        current_dir = os.path.dirname(os.path.abspath(__file__))
+        env_path = os.path.join(current_dir, '.env')
+        load_dotenv(dotenv_path=env_path)
+        self.api_key = os.environ.get("GEMINI_API_KEY", "")
 
         self.client = None
         if self.api_key:
@@ -89,14 +93,11 @@ class VideoAnalyzerSignals(QThread):
 
                     self.log.emit(f"Analyzing frame at {timestamp:.2f}s...")
 
+                    frame_base64 = base64.b64encode(buffer).decode("utf-8")
+
                     if self.api_type == "gemini":
-                        image_part = types.Part.from_bytes(
-                            data=buffer.tobytes(),
-                            mime_type="image/jpeg",
-                        )
-                        comment = self._analyze_frame_with_gemini(prompt, image_part)
+                        comment = self._analyze_frame_with_gemini(prompt, frame_base64)
                     else:
-                        frame_base64 = base64.b64encode(buffer).decode("utf-8")
                         comment = self._analyze_frame_with_ollama(frame_base64, prompt)
 
                     if (
@@ -126,14 +127,27 @@ class VideoAnalyzerSignals(QThread):
         except Exception as e:
             self.error.emit(str(e))
 
-    def _analyze_frame_with_gemini(self, prompt, image_part):
+    def _analyze_frame_with_gemini(self, prompt, base64_image):
         try:
             if self.client is None:
                 return "SKIP"
 
             response = self.client.models.generate_content(
-                model='gemini-3-flash-preview',
-                contents=[prompt, image_part]
+                model='gemini-3.5-flash',
+                contents=[
+                    types.Content(
+                        parts=[
+                            types.Part(text=prompt),
+                            types.Part(
+                                inline_data=types.Blob(
+                                    mime_type="image/jpeg",
+                                    data=base64_image
+                                )
+                            )
+                        ]
+                    )
+                ]
+                #contents=[prompt, image_part]
             )
             return response.text
         except Exception as e:

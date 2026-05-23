@@ -2,3 +2,4 @@ PyQt6
 opencv-python
 requests
 google-genai
+python-dotenv
