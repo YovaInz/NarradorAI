@@ -2,7 +2,7 @@ import json
 from PyQt6.QtWidgets import (
     QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, 
     QPushButton, QLabel, QFileDialog, QDoubleSpinBox, 
-    QTextEdit, QProgressBar, QMessageBox, QSlider, QComboBox
+    QTextEdit, QProgressBar, QMessageBox, QSlider, QComboBox, QCheckBox
 )
 from PyQt6.QtMultimedia import QMediaPlayer, QAudioOutput
 from PyQt6.QtMultimediaWidgets import QVideoWidget
@@ -74,9 +74,13 @@ class MainWindow(QMainWindow):
         controls_layout.addWidget(self.spin_rate)
         
         self.combo_model = QComboBox()
-        self.combo_model.addItems(["ollama", "gemini"])
+        self.combo_model.addItems(["ollama", "gemini", "openai"])
         controls_layout.addWidget(self.combo_model)
         
+        self.check_force = QCheckBox("Forzar nuevo análisis")
+        self.check_force.setToolTip("Ignora el análisis previo y vuelve a procesar el video desde cero.")
+        controls_layout.addWidget(self.check_force)
+
         self.btn_analyze = QPushButton("Comenzar Análisis")
         self.btn_analyze.clicked.connect(self.start_analysis)
         self.btn_analyze.setEnabled(False)
@@ -139,8 +143,9 @@ class MainWindow(QMainWindow):
         
         interval = self.spin_rate.value()
         api_type = self.combo_model.currentText()
+        force_reanalyze = self.check_force.isChecked()
         
-        self.analyzer_thread = VideoAnalyzerSignals(self.current_video_path, interval, api_type)
+        self.analyzer_thread = VideoAnalyzerSignals(self.current_video_path, interval, api_type, force_reanalyze=force_reanalyze)
         self.analyzer_thread.progress.connect(self.progress_bar.setValue)
         self.analyzer_thread.log.connect(self.status_label.setText)
         self.analyzer_thread.finished.connect(self.analysis_finished)
