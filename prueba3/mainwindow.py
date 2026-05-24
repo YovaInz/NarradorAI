@@ -50,9 +50,10 @@ class TTSAudioThread(QThread):
     avanzó demasiado rápido) — así nunca se acumula cola de audios viejos.
     """
 
-    def __init__(self, tts_pipeline):
+    def __init__(self, tts_pipeline, speed_factor: float = 1.4):
         super().__init__()
         self.tts_pipeline = tts_pipeline
+        self.speed_factor = speed_factor          # >1.0 = más rápido, <1.0 = más lento
         self._queue: queue.Queue = queue.Queue(maxsize=1)  # máx 1 pendiente
 
     def speak(self, text: str):
@@ -93,10 +94,16 @@ class TTSAudioThread(QThread):
                 audio /= max_val
             sr = int(output["sampling_rate"])
 
+            # --- Ajuste de velocidad por resampling ---
+            # Declarar el WAV con un framerate mayor "engaña" al reproductor:
+            # reproduce las mismas muestras más rápido sin alterar el pitch.
+            # speed_factor=1.4 → 40% más rápido; ajustable desde el slider.
+            playback_sr = int(sr * self.speed_factor)
+
             # 2. Intentar sounddevice (más limpio, no necesita archivo)
             try:
                 import sounddevice as sd
-                sd.play(audio, samplerate=sr, blocking=True)
+                sd.play(audio, samplerate=playback_sr, blocking=True)
                 return
             except Exception:
                 pass  # fallback a WAV
@@ -109,7 +116,7 @@ class TTSAudioThread(QThread):
             with wave.open(tmp_path, "wb") as wf:
                 wf.setnchannels(1)
                 wf.setsampwidth(2)
-                wf.setframerate(sr)
+                wf.setframerate(playback_sr)  # velocidad aplicada aquí
                 wf.writeframes(pcm.tobytes())
 
             try:
@@ -164,7 +171,7 @@ class MainWindow(QMainWindow):
 
     def _on_tts_ready(self, pipeline):
         self.tts_pipeline  = pipeline
-        self._audio_thread = TTSAudioThread(pipeline)
+        self._audio_thread = TTSAudioThread(pipeline, speed_factor=self.spin_tts_speed.value())
         self._audio_thread.start()
         self.status_label.setText("Listo  ·  Narración de voz activada ✔")
 
@@ -248,6 +255,21 @@ class MainWindow(QMainWindow):
         self.check_tts.stateChanged.connect(self._on_tts_toggle)
         controls_layout.addWidget(self.check_tts)
 
+        lbl_speed = QLabel("Vel. voz:")
+        controls_layout.addWidget(lbl_speed)
+
+        self.spin_tts_speed = QDoubleSpinBox()
+        self.spin_tts_speed.setRange(0.5, 3.0)
+        self.spin_tts_speed.setValue(1.4)
+        self.spin_tts_speed.setSingleStep(0.1)
+        self.spin_tts_speed.setDecimals(1)
+        self.spin_tts_speed.setToolTip(
+            "Velocidad de narración (1.0 = normal, 1.4 = 40% más rápido).\n"
+            "Cambia en tiempo real; se aplica al siguiente comentario."
+        )
+        self.spin_tts_speed.valueChanged.connect(self._on_speed_changed)
+        controls_layout.addWidget(self.spin_tts_speed)
+
         self.btn_analyze = QPushButton("Comenzar Análisis")
         self.btn_analyze.clicked.connect(self.start_analysis)
         self.btn_analyze.setEnabled(False)
@@ -282,6 +304,11 @@ class MainWindow(QMainWindow):
     # ------------------------------------------------------------------
     def _on_tts_toggle(self, state):
         self.tts_enabled = bool(state)
+
+    def _on_speed_changed(self, value: float):
+        """Actualiza la velocidad en el hilo de audio en tiempo real."""
+        if self._audio_thread is not None:
+            self._audio_thread.speed_factor = value
 
     def select_video(self):
         file_path, _ = QFileDialog.getOpenFileName(

@@ -94,9 +94,10 @@ class VideoAnalyzerSignals(QThread):
                 "Tu objetivo es narrar la acción con lenguaje técnico, variado y preciso. "
                 "Prohibido usar muletillas repetitivas como 'increíble', 'wow' o 'espectacular'. "
                 "Analiza este frame enfocándote en estos detalles: "
-                "1. Lee el Killfeed (arriba a la derecha) para mencionar nombres de jugadores o el arma utilizada si hay una baja (recuerda que los eliminados son los que aparecen en rojo). "
+                "1. Lee el Killfeed (arriba a la derecha) para mencionar nombres de jugadores o el arma utilizada si hay una baja (recuerda que los muertos aparecen a la derecha y los vivos aparecen a la izquierda del killfeed). "
                 "2. Si hay un enfrentamiento, usa jerga del juego (ej. 'tradeo', 'clutch', 'entry', 'pikeando'). "
-                "Reglas de formato: Escribe un comentario de máximo 35 palabras. Texto plano, sin emojis. "
+                "Reglas de formato: Escribe un comentario de máximo 20 palabras. Texto plano, sin emojis. "
+                "Si es que hubo alguna kill (o multikill), menciona unicamente el suceso. "
                 "Si la pantalla está tranquila (fase de barreras, solo caminando por el mapa o campeando sin enemigos cerca), responde ÚNICAMENTE con la palabra 'SKIP'."
             )
 
