@@ -1,4 +1,4 @@
-# 🎙️ Narrador IA — Comentarista Automático de Valorant
+# Narrador IA — Comentarista Automático de Valorant
 
 Aplicación de escritorio que analiza clips de Valorant fotograma a fotograma, genera comentarios narrativos con un modelo de lenguaje multimodal, y los narra en voz alta en español sincronizados con la reproducción del video.
 
@@ -22,10 +22,10 @@ Aplicación de escritorio que analiza clips de Valorant fotograma a fotograma, g
 │                      mainwindow.py                          │
 │                   Ventana principal (PyQt6)                 │
 │                                                             │
-│  ┌─────────────────┐   ┌──────────────┐  ┌──────────────┐   │
-│  │   TTSLoader     │   │ QMediaPlayer │  │  CommentBox  │   │
-│  │  (QThread)      │   │  (video)     │  │  (QTextEdit) │   │
-│  │ Carga el modelo │   └──────┬───────┘  └──────┬───────┘   │
+│  ┌─────────────────┐   ┌──────────────┐   ┌──────────────┐  │
+│  │   TTSLoader     │   │ QMediaPlayer │   │  CommentBox  │  │
+│  │  (QThread)      │   │  (video)     │   │  (QTextEdit) │  │
+│  │ Carga el modelo │   └──────┬───────┘   └──────┬───────┘  │
 │  │ MMS-TTS en BG   │          │ positionChanged  │ append   │
 │  └────────┬────────┘          └──────────────────┘          │
 │           │ ready signal                                    │
@@ -74,69 +74,6 @@ Audio WAV en español (velocidad ajustable)
     ▼ sounddevice / winsound
 Narración sincronizada
 ```
-
----
-
-## Requisitos del sistema
-
-- Python 3.10 o superior
-- Windows 10/11, macOS 12+, o Linux con PulseAudio
-- GPU opcional pero recomendada para Ollama (VRAM ≥ 8 GB para modelos grandes)
-- Conexión a internet solo si usas Gemini u OpenAI
-
----
-
-## Instalación paso a paso
-
-### 1. Crear entorno virtual (recomendado)
-
-```bash
-python -m venv .venv
-
-# Windows
-.venv\Scripts\activate
-
-# macOS / Linux
-source .venv/bin/activate
-```
-
-### 2. Instalar dependencias Python
-
-```bash
-pip install -r requirements.txt
-```
-
-
-### 3. Instalar Ollama (solo si usas el modo local)
-
-1. Descarga Ollama desde https://ollama.com/download
-2. Instala y ejecuta el servidor:
-
-```bash
-ollama serve
-```
-
-3. Descarga el modelo multimodal. El proyecto está configurado para `gemma4:e4b` (4B parámetros, ~3 GB):
-
-```bash
-ollama run gemma4:e4b
-```
-
-> Puedes usar cualquier modelo con capacidad de visión disponible en https://ollama.com/library.
-> Para cambiarlo, edita `analyzer.py` → `payload["model"]`.
-
-### 4. Configurar API keys (solo Gemini u OpenAI)
-
-Crea un archivo `.env` en la raíz del proyecto:
-
-```env
-GEMINI_API_KEY=tu_clave_aqui
-OPENAI_API_KEY=tu_clave_aqui
-```
-
-Obtén las claves en:
-- Gemini: https://aistudio.google.com/apikey
-- OpenAI: https://platform.openai.com/api-keys
 
 ---
 
@@ -205,7 +142,7 @@ NarradorAI/
 
 | Componente | Modelo | Proveedor |
 |---|---|---|
-| Visión (local) | `gemma4:e4b` | Ollama |
+| Visión (local) | `gemma4:e4b` | Ollama / Google |
 | Visión (cloud) | `gemini-3.5-flash` | Google |
 | Visión (cloud) | `gpt-4o-mini` | OpenAI |
 | Texto a voz | `facebook/mms-tts-spa` | HuggingFace |
