@@ -5,7 +5,7 @@ import os
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from PyQt6.QtWidgets import QApplication
-from NarradorAI.Interfaz.mainwindow import MainWindow
+from Interfaz.mainwindow import MainWindow
 
 def main():
     app = QApplication(sys.argv)

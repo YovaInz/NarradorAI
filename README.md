@@ -173,10 +173,9 @@ Al arrancar, la app carga automáticamente el modelo TTS (`facebook/mms-tts-spa`
 ---
 
 ## Estructura del proyecto
-
+```
 NarradorAI/
 ├── main.py                          # Punto de entrada
-├── env                              # API keys
 ├── .gitignore
 ├── requirements.txt
 ├── README.md
@@ -184,6 +183,7 @@ NarradorAI/
 │
 ├── AnalisisModelo/                  # Extracción de frames y consulta al LLM
 │   ├── __init__.py
+│   ├── .env                         # API keys
 │   └── analyzer.py
 │
 ├── Interfaz/                        # UI PyQt6
@@ -193,14 +193,14 @@ NarradorAI/
 ├── TTS/                             # Síntesis de voz
 │   ├── __init__.py
 │   ├── TTS_Controller.py            # Mixin TTS + TTSLoader + TTSAudioThread
-│   └── video_player.py             # Mixin reproducción y sincronización de comentarios
+│   └── video_player.py              # Mixin reproducción y sincronización de comentarios
 │
 └── examples/                        # Videos y JSONs de prueba
     ├── Sin título.mp4
     ├── Sin título_comments.json
     ├── Timeline 1.mp4
     └── Timeline 1_comments.json
-
+```
 ## Modelos utilizados
 
 | Componente | Modelo | Proveedor |

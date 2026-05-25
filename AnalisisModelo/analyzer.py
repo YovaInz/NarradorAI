@@ -237,7 +237,7 @@ class VideoAnalyzerSignals(QThread):
         }
         try:
             response = requests.post(
-                f"{self.ollama_url}/api/generate", json=payload, timeout=300
+                f"{self.ollama_url}/api/generate", json=payload, timeout=60
             )
             response.raise_for_status()
             data = response.json()
